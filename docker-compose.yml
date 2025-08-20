@@ -1,0 +1,44 @@
+version: "3.8"
+services:
+  gateway:
+    build: ./api_gateway
+    container_name: api_gateway
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./public:/usr/src/public
+    environment:
+      - NODE_ENV=production
+    env_file:
+      - ./api_gateway/.env
+    depends_on:
+      - redis
+      - users
+      - orders
+    networks:
+      - backend
+    
+  redis:
+    image: redis:7-alpine
+    container_name: redis-server
+    #ports:
+    #  - "127.0.0.1:6379:6379" #  right now it is not accessible through reqs from outside container ,to access it redis port: - "6379:6379"
+    networks:
+      - backend
+  orders:
+    build: ./orders-service
+    #ports:
+    #  - "5002:5002" # internal only
+    networks:
+      - backend 
+  
+  users:
+    build: ./users-service
+    #ports: 
+    #  - "5001:5001"
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver : bridge
